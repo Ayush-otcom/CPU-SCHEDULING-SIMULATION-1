@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPU Scheduling Simulator — OS Lab</title>
+<meta name="description" content="Interactive CPU Scheduling Simulator supporting FCFS, SJF, SRTF, Round Robin, and Priority scheduling algorithms. Built for Operating Systems Lab.">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="vignette"></div>
+
+<div class="container">
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="s-left"><div class="status-dot"></div>SYSTEM ONLINE</div>
+  <div class="s-right">
+    <div class="s-item"><span>MODULE</span><span class="s-val">CPU_SCHED_v3</span></div>
+    <div class="s-item"><span>MODE</span><span class="s-val">SIMULATION</span></div>
+    <div class="s-item"><span>CORE</span><span class="s-val" id="sb-algo">FCFS</span></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="holo-ring"></div>
+  <div class="header-badge">OS Lab Project &nbsp;·&nbsp; Operating Systems</div>
+  <p class="header-eyebrow">Process Management &amp; Scheduling</p>
+  <h1>CPU Scheduling<br>Simulator</h1>
+  <div class="title-underline"></div>
+  <p class="subtitle" style="margin-top:20px">FCFS <span>·</span> SJF <span>·</span> SRTF <span>·</span> Round Robin <span>·</span> Priority</p>
+</header>
+
+<!-- STEP 1: ALGORITHM -->
+<div class="card">
+  <div class="card-corner tl"></div>
+  <div class="card-corner tr"></div>
+  <div class="card-corner bl"></div>
+  <div class="card-corner br"></div>
+  <div class="card-glow"></div>
+  <div class="card-title"><span class="step-badge">01</span> Select Scheduling Algorithm <div class="ct-line"></div><span class="chip">CORE CONFIG</span></div>
+  <div class="algo-grid" id="algo-grid">
+    <button class="algo-btn active" data-algo="fcfs">
+      <span class="algo-short">FCFS</span>
+      <span class="algo-desc">First Come First Served</span>
+    </button>
+    <button class="algo-btn" data-algo="sjf">
+      <span class="algo-short">SJF</span>
+      <span class="algo-desc">Shortest Job First</span>
+    </button>
+    <button class="algo-btn" data-algo="srtf">
+      <span class="algo-short">SRTF</span>
+      <span class="algo-desc">Preemptive SJF</span>
+    </button>
+    <button class="algo-btn" data-algo="rr">
+      <span class="algo-short">RR</span>
+      <span class="algo-desc">Round Robin</span>
+    </button>
+    <button class="algo-btn" data-algo="priority">
+      <span class="algo-short">PRIOR</span>
+      <span class="algo-desc">Non-Preemptive</span>
+    </button>
+    <button class="algo-btn" data-algo="priorityp">
+      <span class="algo-short">P·PRIOR</span>
+      <span class="algo-desc">Preemptive Priority</span>
+    </button>
+  </div>
+  <div class="quantum-row" id="quantum-row" style="display:none">
+    <label>⏱ Time Quantum (q) :</label>
+    <input type="number" id="quantum" value="2" min="1" max="50">
+    <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">max time units per turn</span>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="card">
+  <div class="card-corner tl"></div>
+  <div class="card-corner tr"></div>
+  <div class="card-corner bl"></div>
+  <div class="card-corner br"></div>
+  <div class="card-glow"></div>
+  <div class="card-title"><span class="step-badge">02</span> Number of Processes <div class="ct-line"></div><span class="chip">PROCESS POOL</span></div>
+  <div class="count-selector">
+    <label>Processes to schedule:</label>
+    <input type="number" class="count-input" id="proc-count-input" value="4" min="1" max="20" placeholder="4">
+    <button class="btn-set-count" onclick="buildProcessTable()">GENERATE →</button>
+    <span class="count-hint">Range: 1 – 20</span>
+  </div>
+  <div id="count-err" class="err-msg"></div>
+</div>
+
+<!-- STEP 3 -->
+<div class="card" id="proc-input-card" style="display:none">
+  <div class="card-corner tl"></div>
+  <div class="card-corner tr"></div>
+  <div class="card-corner bl"></div>
+  <div class="card-corner br"></div>
+  <div class="card-glow"></div>
+  <div class="card-title"><span class="step-badge">03</span> Enter Process Details <div class="ct-line"></div><span class="chip">PAYLOAD</span></div>
+  <p style="font-size:11px;color:var(--text3);margin-bottom:18px;font-family:var(--mono)">
+    Fill Arrival Time, Burst Time and Priority for each process. Priority 1 = highest.
+  </p>
+  <div style="overflow-x:auto">
+    <table class="proc-input-table" id="proc-input-table">
+      <thead>
+        <tr>
+          <th>Process</th>
+          <th>Arrival Time</th>
+          <th>Burst Time</th>
+          <th>Priority <span style="font-size:8px;color:var(--text3)">(1=HIGH)</span></th>
+        </tr>
+      </thead>
+      <tbody id="proc-input-body"></tbody>
+    </table>
+  </div>
+  <hr class="divider">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-ghost" onclick="fillDemo()">⚡ Auto-fill Demo</button>
+    <button class="btn btn-ghost" onclick="clearInputs()" style="color:var(--danger);border-color:rgba(255,61,110,0.22)">✕ Clear All</button>
+    <span id="proc-input-err" class="err-msg" style="margin:0"></span>
+  </div>
+</div>
+
+<!-- RUN -->
+<div id="run-section" style="display:none">
+  <div class="run-wrap">
+    <button class="btn-run" onclick="simulate()">▶ &nbsp;&nbsp;EXECUTE SIMULATION</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results">
+  <div class="card">
+    <div class="card-corner tl"></div>
+    <div class="card-corner tr"></div>
+    <div class="card-corner bl"></div>
+    <div class="card-corner br"></div>
+    <div class="card-glow"></div>
+    <div class="card-title" id="result-algo-label">◆ Gantt Chart <div class="ct-line"></div></div>
+    <div id="gantt-scroll"><svg id="gantt-svg"></svg></div>
+    <div class="legend" id="gantt-legend"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-corner tl"></div>
+    <div class="card-corner tr"></div>
+    <div class="card-corner bl"></div>
+    <div class="card-corner br"></div>
+    <div class="card-glow"></div>
+    <div class="card-title">◆ Performance Metrics <div class="ct-line"></div></div>
+    <div class="metrics-grid" id="metrics-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-corner tl"></div>
+    <div class="card-corner tr"></div>
+    <div class="card-corner bl"></div>
+    <div class="card-corner br"></div>
+    <div class="card-glow"></div>
+    <div class="card-title">◆ Process Details Table <div class="ct-line"></div></div>
+    <div class="result-table-wrap">
+      <table class="rtable">
+        <thead>
+          <tr>
+            <th>PID</th><th>Arrival</th><th>Burst</th><th>Priority</th>
+            <th>Completion</th><th>Turnaround</th><th>Waiting</th><th>Response</th>
+          </tr>
+        </thead>
+        <tbody id="result-body"></tbody>
+      </table>
+    </div>
+    <p style="font-size:10px;color:var(--text3);margin-top:14px;font-family:var(--mono)">
+      <span style="color:var(--accent3)">■</span> Best (lowest waiting)
+      &nbsp;&nbsp;<span style="color:var(--danger)">■</span> Worst (highest waiting)
+    </p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    CPU SCHEDULING SIMULATOR &nbsp;<span>·</span>&nbsp; OPERATING SYSTEMS LAB &nbsp;<span>·</span>&nbsp; v3.0
+  </div>
+</footer>
+
+</div><!-- /container -->
+
+<!-- THREE.JS 3D BACKGROUND -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/background.js"></script>
+<script src="js/scheduler.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
