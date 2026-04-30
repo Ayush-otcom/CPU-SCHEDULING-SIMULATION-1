@@ -1,5 +1,9 @@
 # CPU Scheduling Simulator
 
+## 📌 Overview
+
+This project demonstrates how CPU scheduling algorithms work through interactive simulation. It helps students understand process execution, waiting time, and system performance visually.
+
 An interactive, visually stunning CPU Scheduling Simulator built for the **Operating Systems Lab**. Simulate and visualize how different CPU scheduling algorithms manage process execution in real time.
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
