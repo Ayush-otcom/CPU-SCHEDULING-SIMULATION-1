@@ -1,8 +1,17 @@
 // ═══════════════════════════════════════
 //  CPU SCHEDULING ALGORITHMS
 // ═══════════════════════════════════════
-
+// Implements:
+// - FCFS (First Come First Served)
+// - SJF (Shortest Job First)
+// - SRTF (Shortest Remaining Time First)
+// - Round Robin
+// - Priority (Preemptive & Non-Preemptive)
+// ═══════════════════════════════════════
 // ── FCFS ──
+// FCFS (First Come First Served)
+// Processes are executed in order of arrival time.
+// Non-preemptive scheduling algorithm.
 function schedFCFS(procs){
   const ps=[...procs].sort((a,b)=>a.at-b.at);
   const tl=[];let t=0;
@@ -15,6 +24,9 @@ function schedFCFS(procs){
 }
 
 // ── SJF (Non-Preemptive) ──
+// SJF (Shortest Job First)
+// Selects the process with the smallest burst time.
+// Can lead to starvation for longer processes.
 function schedSJF(procs){
   const ps=procs.map(p=>({...p})).sort((a,b)=>a.at-b.at);
   const tl=[];let t=0;const done=new Set();
@@ -30,6 +42,7 @@ function schedSJF(procs){
 }
 
 // ── SRTF (Preemptive SJF) ──
+
 function schedSRTF(procs){
   const ps=procs.map(p=>({...p,rem:p.bt}));
   const tl=[];let t=0;let last=null;let ls=0;
@@ -53,6 +66,9 @@ function schedSRTF(procs){
 }
 
 // ── Round Robin ──
+// Round Robin Scheduling
+// Each process gets a fixed time quantum in cyclic order.
+// Preemptive algorithm ensuring fairness.
 function schedRR(procs,q){
   const ps=procs.map(p=>({...p,rem:p.bt})).sort((a,b)=>a.at-b.at);
   const tl=[];let t=0;const queue=[];let idx=0;const seen=new Set();
