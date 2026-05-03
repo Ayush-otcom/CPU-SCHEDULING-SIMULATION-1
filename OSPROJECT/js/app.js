@@ -229,7 +229,8 @@ function simulate(){
   errEl.style.display='none';
   const processes=collectProcesses();
   if(!processes){
-    errEl.textContent='Fix highlighted fields before running.';
+    // errEl.textContent='Fix highlighted fields before running.';
+    errEl.textContent='Invalid input detected. Please correct highlighted fields (Arrival ≥ 0, Burst ≥ 1, Priority ≥ 1).';
     errEl.style.display='block';
     document.getElementById('proc-input-card').scrollIntoView({behavior:'smooth'});
     return;
