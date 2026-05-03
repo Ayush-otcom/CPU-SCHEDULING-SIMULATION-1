@@ -150,7 +150,10 @@ function mergeTL(tl){
 function computeMetrics(procs,tl){
   return procs.map(p=>{
     const segs=tl.filter(s=>s.pid===p.pid);
-    if(!segs.length) return null;
+    if(!segs.length){
+  console.warn(`No timeline segments found for process ${p.pid}`);
+  return null;
+}
     const completion=Math.max(...segs.map(s=>s.end));
     const firstStart=Math.min(...segs.map(s=>s.start));
     const tat=completion-p.at;
